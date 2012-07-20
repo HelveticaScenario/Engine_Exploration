@@ -24,20 +24,22 @@ function love.load()
     		racesSpriteBatch:addq(tiles[0][0], i*sizeSq, j*sizeSq)
     	end
     end
-	x = 100
-	y = 100
 end
 
 function love.draw()
 
     love.graphics.setBlendMode('alpha')
     love.graphics.setBackgroundColor(150,150,150)
+    love.graphics.draw(racesSpriteBatch, 0, 0)
     for i=0,1 do
 		for j=0,12 do
-			love.graphics.drawq(racesImage, races[i][j], i*90, j*90)
+			love.graphics.drawq(racesImage, races[i][j], i*96, j*96)
 		end
 	end
-	love.graphics.draw(racesSpriteBatch, 0, 0)
+	local x, y = love.mouse.getPosition()
+	love.mouse.setVisible(False)
+	love.graphics.drawq(racesImage, races[1][1], x-32, y-32)
+	
 
 		
 
