@@ -1,0 +1,38 @@
+h1. LÖVE-class
+
+A Lua library that wraps LÖVE objects into classes.
+
+h1. Dependencies
+
+LÖVE-class depends on "vrld's HUMP":http://github.com/vrld/hump library. You need to have Class and Timer in _G before you require these classes.
+
+h1. Documentation
+
+There is no documentation at the moment.
+
+h1. Features
+  * Color class for easy re-use of colours.
+  * SoundEffect class with built-in source management.
+  * Wraps most LÖVE objects:
+  ** Image
+  ** ParticleSystem
+  ** Framebuffer
+  ** Font
+  ** ImageFont
+  ** Quad
+  ** Music
+  * String library extensions.
+
+h1. Using LÖVE-class in your LÖVE game
+
+If your game folder is a git repository, using an up-to-date LÖVE-class is easy.
+Just be in the root folder of your game's source code, and issue the following command:
+
+bc. git submodule add git://github.com/TheLinx/loveclass.git [optional: where to put LÖVE-class]
+
+If you just want to download the source code, use this command:
+
+bc. git clone git://github.com/TheLinx/loveclass.git
+
+Then, just require @loveclass@.
+Make sure to call @loveclass.update@ in your @love.update@!
