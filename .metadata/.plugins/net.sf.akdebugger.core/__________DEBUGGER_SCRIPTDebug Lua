@@ -1,0 +1,984 @@
+--
+-- akdebugger (http://sourceforge.net/projects/akdebugger/)
+-- Copyright Alex Kosinsky
+--
+ 
+local Transport={Socket=0,FileSystem=1}
+local ExecutionMode={EmbeddedLua=0,StandaloneLua=1}
+local debugger=nil
+
+
+local function write_trace(str)
+		print(str)
+		io.flush()
+
+--[[
+	local hFile=io.open("trace.txt","a+")	
+	hFile:write(str .. "\n")
+	hFile:close()
+]]	
+end
+--write_trace("Start")
+
+local DebuggingType={
+		CoronaSDKonWindows = 0,StandaloneLua = 1,EmbeddedLua = 2,PSP = 3,LuaForAndroid = 4
+}
+
+local Variable={
+	stepping=0,isStopped=1,isBreakPoint=2,breakpointToggled=3,terminate=4,const_free_ticks=5,stack_level_stop=6,stack_level=7,
+	reset_filePos=8,rapidMode=9
+}
+local Command={
+	Name="C",
+		NotExists=0,CallMethod=1
+}
+
+local Method={
+	Name="M",
+		Write_table=0,
+		Call_debug_traceback=1,Call_debug_getinfo=2,Call_debug_getlocal=3,Call_type=4,Call_tostring=5,
+		Call_tonumber=6,Write_frames=7,Write_locals=8,Evaluate_expression=9
+}
+
+local Evaluate_expression={
+	StrExpression=0,ReturnStatusCode=1,ReturnValue=2
+}
+
+local Write_locals={
+	Thread=0,Level=1
+}
+
+local Write_frames={
+	Thread=0,What=1
+}
+
+local Call_debug_getinfo={
+	Thread=0,Function=1,What=2,Return=3
+}
+
+local Write_table={
+	Table=0
+}
+
+local Call_debug_getlocal={
+	Thread=0,Level=1,Local=2,ReturnName=3,ReturnValue=4
+}
+
+
+local javaFile
+
+local function createJava(className,tab)
+	javaFile:write("static class " .. className .. "{\n")
+	for k,v in pairs(tab) do 
+		local t=type(v)
+		if  t == "number" then
+			javaFile:write("static int " .. k .. " = " .. tostring(v) .. ";\n")
+		else
+			javaFile:write("static String " .. k .. " = \"" .. v .. "\";\n")
+		end
+	end
+	javaFile:write("}\n\n")
+end
+
+local function createJavaWithNames(className,tab)
+	local m={}
+	local max=-1
+	javaFile:write("static class " .. className .. "{\n")
+	for k,v in pairs(tab) do 
+		local t=type(v)
+		if  t == "number" then
+			m[v]=k
+			if  v>max then
+				max=v
+			end
+			javaFile:write("static int " .. k .. " = " .. tostring(v) .. ";\n")
+		else
+			javaFile:write("static String " .. k .. " = \"" .. v .. "\";\n")
+		end
+	end
+	javaFile:write("static String[] Names={ ")
+	for i = 0, max, 1 do 
+		javaFile:write("\"")
+		if  m[i] then
+			javaFile:write(m[i])
+		end
+		javaFile:write("\"")
+		if i < max then
+			javaFile:write(",")
+		end
+	end
+	javaFile:write(" };\n")
+	javaFile:write("}\n\n")
+end
+
+
+
+
+local function createParamMethods()
+	local local_idx=1
+	local t={}
+	while true do
+		local retName,retVal=debug.getlocal(2,local_idx)
+		if not retName then
+			break
+		end
+		t[retName]=retVal
+		local_idx=local_idx+1
+	end
+
+	for k,v in pairs(Method) do
+		local param=t[k]
+		if param then
+			createJava(k,param)
+		end
+	end
+end
+
+local InputChannel = {
+	OBJECT_NAME="InputChannel"
+}
+function InputChannel.new(transport,arg)
+	local res={}
+	res.transport=transport
+    if res.transport == Transport.Socket then
+        res.clientSocket=arg
+    elseif res.transport == Transport.FileSystem then
+        res.file_name=arg
+		res.hFile=nil
+		if InputChannel.exists_file(res.file_name) then
+			os.remove(res.file_name)
+		end
+    end
+    setmetatable(res,{ __index = InputChannel })
+    return res
+end
+
+function InputChannel.exists_file(file)
+	local f=io.open (file, "rb")
+	if not f then
+		return nil
+	end
+	f:close()
+	return true
+end
+
+
+
+function InputChannel:read()
+	if self.transport == Transport.Socket then
+		if not self.clientSocket.stream then
+			self.clientSocket.stream=self.clientSocket.luaSocket.connect(self.clientSocket.host,self.clientSocket.port)
+		end
+		return self.clientSocket.stream:receive(1)
+	end
+	if not self.hFile then
+		while not InputChannel.exists_file(self.file_name) do
+		end
+		self.hFile=io.open(self.file_name,"rb")
+		self.filePos=0
+	end
+	local r=self.hFile:seek("set",self.filePos)
+	local b=self.hFile:read(1)
+	while not b do
+		b=self.hFile:read(1)
+	end
+	self.filePos=self.filePos+1
+	return b
+end
+
+function InputChannel:shutdown()
+	if self.transport == Transport.Socket then
+		return 0
+	end
+end
+
+local OutputChannel = {
+	OBJECT_NAME="OutputChannel"
+}
+function OutputChannel.new(transport,arg)
+	local res={}
+	res.transport=transport
+    if res.transport == Transport.Socket then
+        res.clientSocket=arg
+    elseif res.transport == Transport.FileSystem then
+        res.file_name=arg
+		res.hFile=nil
+		if InputChannel.exists_file(res.file_name) then
+			os.remove(res.file_name)
+		end
+    end
+    setmetatable(res,{ __index = OutputChannel })
+    return res
+end
+
+
+function OutputChannel:shutdown()
+	if self.transport == Transport.Socket then
+		return 0
+	end
+end
+
+function OutputChannel:flush()
+	if self.transport == Transport.Socket then
+		return 0
+	end
+	self.hFile:flush()
+end
+
+
+function OutputChannel:write(str)
+	if self.transport == Transport.Socket then
+		while not self.clientSocket.stream do
+			self.clientSocket.stream=self.clientSocket.luaSocket.connect(self.clientSocket.host,self.clientSocket.port)
+		end
+		self.clientSocket.stream:send(str)
+		return
+	end
+	if not self.hFile then
+		self.hFile=io.open(self.file_name,"wb")		
+	end
+	self.hFile:write(str)
+end
+
+
+
+
+local LuaTypes = {
+		LUA_TNIL=0,LUA_TBOOLEAN=1,LUA_TNUMBER=3,LUA_TSTRING=4,LUA_TTABLE=5,LUA_TFUNCTION=6,
+		LUA_TUSERDATA=7,LUA_TTHREAD=8
+		}
+
+local JavaTypes = {
+	INT_TYPE=11,STRING_TYPE=13
+}
+		
+local CStruct = {
+	OBJECT_NAME="CStruct"
+}
+function CStruct.new(transport,arg1,arg2)
+	local res={}
+	res.ptr=0
+	res.lenStruct=0
+	res.buffer=""
+	res.ht={}
+	res.transport=transport
+    if res.transport == Transport.Socket then
+		res.clientSocket={host=arg1,port=arg2,luaSocket = require("socket")}
+        res.inputChannel=InputChannel.new(Transport.Socket,res.clientSocket)
+		res.outputChannel=OutputChannel.new(Transport.Socket,res.clientSocket)
+    elseif res.transport == Transport.FileSystem then
+        res.inputChannel=InputChannel.new(Transport.FileSystem,arg1)
+		res.outputChannel=OutputChannel.new(Transport.FileSystem,arg2)
+		res.acceptFile=arg2 .. ".accept"
+		res.connectedFile=arg2 .. ".connected"
+    end
+    setmetatable(res,{ __index = CStruct })
+    return res
+end
+
+function CStruct:reset_filePos()
+	if self.transport == Transport.FileSystem then
+		self.outputChannel.hFile:close()
+		self.outputChannel.hFile=io.open(self.outputChannel.file_name,"wb")
+		local b
+		while true do
+			self.inputChannel.hFile:close()
+			self.inputChannel.hFile=io.open(self.inputChannel.file_name,"rb")
+			while not self.inputChannel.hFile do
+				self.inputChannel.hFile=io.open(self.inputChannel.file_name,"rb")
+			end 
+			b=self.inputChannel.hFile:read(1)
+			if not b then
+				break
+			end
+		end
+		self.inputChannel.filePos=0
+		self.inputChannel.hFile:seek("set",0)
+	end
+end
+	
+function CStruct:connect()
+	if self.transport == Transport.Socket then
+		return 0
+	elseif self.transport == Transport.FileSystem then
+		repeat
+			while not InputChannel.exists_file(self.acceptFile) do
+			end
+			local f=io.open(self.acceptFile,"r")
+			local key=f:read("*a")
+			f:close()
+			f=io.open(self.connectedFile,"w")
+			f:write(key)
+			f:close()
+			local t=os.clock()
+			while InputChannel.exists_file(self.acceptFile) do
+				if os.clock()-t>10 then
+					break
+				end
+			end
+		until not InputChannel.exists_file(self.acceptFile)
+	end
+end
+
+function CStruct:fillBuffer(len)
+	self.buffer=""
+	while true do
+		local ch=self.inputChannel:read()
+		if len<0 and ch=="," then
+			break;
+		end
+		self.buffer = self.buffer .. ch
+		len=len-1
+		if len==0 then
+			break;
+		end
+	end
+end
+	
+function CStruct:findDelimiter()
+	local curPtr=self.ptr
+	while true do
+		local ch=string.sub(self.buffer,curPtr,curPtr);
+		if ch=="," then
+			break
+		end
+		curPtr=curPtr+1;
+	end
+	return curPtr
+end
+	
+function CStruct:getVarName()
+	local curPtr=self:findDelimiter()
+	local varName=string.sub(self.buffer,self.ptr,curPtr-1)
+	self.ptr=curPtr+1
+	return varName
+end
+
+function CStruct:getInt()
+	local curPtr=self:findDelimiter()
+	local len=string.sub(self.buffer,self.ptr,curPtr-1)
+	self.ptr=curPtr+1
+	return tonumber(len)
+end
+
+function CStruct:readTable()
+	self.ht={}
+	self:fillBuffer(-1)
+	self.lenStruct=tonumber(self.buffer)
+	self:fillBuffer(self.lenStruct)
+	self.ptr=1
+	while true do
+		local varName=self:getVarName()
+		local varType=self:getInt();
+		local varSize=self:getInt();
+		local varValue=string.sub(self.buffer,self.ptr,self.ptr+varSize-1)
+		if varType == JavaTypes.STRING_TYPE then
+			self.ht[varName]=varValue
+		elseif varType == JavaTypes.INT_TYPE then
+			self.ht[varName]=tonumber(varValue)
+		elseif varType == LuaTypes.LUA_TSTRING then
+			self.ht[varName]=varValue
+		elseif varType == LuaTypes.LUA_TNUMBER then
+			self.ht[varName]=tonumber(varValue)
+		elseif varType == LuaTypes.LUA_TBOOLEAN then
+			if varValue=="false" then
+				varValue=false
+			else
+				varValue=true
+			end
+			self.ht[varName]=varValue
+		end
+		self.ptr=self.ptr+varSize
+		if self.ptr>=self.lenStruct then
+			break;
+		end
+	end
+end
+
+function CStruct:getVar(varName)
+	if type(varName)=="number" then
+		varName="v" .. tonumber(varName)
+	end
+	return self.ht[varName]
+end
+
+function CStruct:init()
+	self.buffer=""
+end
+
+function CStruct:trace(str)
+	--if self.line==43 then
+		print(str)
+		io.flush()
+	--end
+
+end
+
+local function protectEvaluate( strExpression)
+	local f=assert (loadstring ("return " .. strExpression))
+	local r1,r2,r3,r4,r5,r6,r7,r8,r9,r10=f()
+	local r={ r1,r2,r3,r4,r5,r6,r7,r8,r9,r10 }
+	if #r==1 then
+		return r[1]
+	end
+	if #r==0 then
+		return nil
+	end
+	return r
+end
+
+--tttt=protectEvaluate("nil,nil,nil,100+100")
+
+local function protectAddVar(varName,value,isLuaType)
+	local varType
+	local typeName=type(value)
+	if typeName == "nil" then
+		value=""
+	end
+	if isLuaType then
+		varName=tostring(varName)
+		local save_idx=tonumber(isLuaType)
+		if typeName == "nil" then
+			varType=LuaTypes.LUA_TNIL
+		elseif typeName == "number" then
+			value=tostring(value)
+			varType=LuaTypes.LUA_TNUMBER
+		elseif typeName == "string" then
+			varType=LuaTypes.LUA_TSTRING
+		elseif typeName == "boolean" then
+			if value then
+				value="true"
+			else
+				value="false"
+			end
+			varType=LuaTypes.LUA_TBOOLEAN
+		elseif typeName == "table" then
+			if save_idx then
+				local n_items=0
+				for k,v in pairs(value) do 
+					n_items=n_items+1
+				end
+				value=save_idx .. "." .. n_items
+			else
+				value=tostring(value)
+			end
+			varType=LuaTypes.LUA_TTABLE
+		elseif typeName == "function" then
+			value=tostring(value)
+			varType=LuaTypes.LUA_TFUNCTION
+		elseif typeName == "thread" then
+			value=tostring(value)
+			varType=LuaTypes.LUA_TTHREAD
+		elseif typeName == "userdata" then
+			if save_idx then
+				local mt=getmetatable(value)
+				local n_items=0
+				if mt then
+					for k,v in pairs(mt) do 
+						n_items=n_items+1
+					end
+				end
+				value=save_idx .. "." .. n_items
+			else
+				local v,r=pcall (tostring, value)
+				if v then
+					value=r
+				else
+					value="userdata"
+				end
+			end
+			--value=tostring(value)
+			varType=LuaTypes.LUA_TUSERDATA
+		end
+	else
+		if type(varName)=="number" then
+			varName="v" .. tonumber(varName)
+		end
+		if typeName == "number" then
+			varType=JavaTypes.INT_TYPE
+			value=tostring(value)
+		else
+			varType=JavaTypes.STRING_TYPE
+		end			
+	end
+	varName=string.gsub (varName, ",", ";")
+	local buffer=varName .. "," .. tostring(varType) .. "," .. tostring(string.len(value)) .. "," .. value
+	return buffer
+end
+
+function CStruct:addVar(varName,value,isLuaType)
+	local res,buf=pcall(protectAddVar,varName,value,isLuaType)
+	if res then
+		self.buffer=self.buffer .. buf
+	end
+end
+
+
+local total_ch=0
+function CStruct:write()
+	local s=tostring(string.len(self.buffer)) .. ","
+	self.outputChannel:write(s)
+	total_ch=total_ch+string.len(s)
+	self.outputChannel:write(self.buffer)
+	total_ch=total_ch+string.len(self.buffer)
+	self.outputChannel:flush()
+	--print(s .. "total: " .. total_ch)
+	self:init();
+end
+
+
+
+
+
+
+local Debugger = { 
+	OBJECT_NAME="Debugger",
+	VALUE_true=1, VALUE_false=0
+}
+function Debugger.new(transport,arg1,arg2)
+	local res={}
+	res.prev_os_clock=os.clock()
+	res.stack_level=0
+	res.stack_level_stop=-1
+	res.DEBUGGER_SCRIPT=""
+	res.executionMode=ExecutionMode.StandaloneLua
+	res.debuggingType=DebuggingType.StandaloneLua
+	res.line=-1
+	res.const_free_ticks=10000
+	res.current_tick=0
+	res.max_stack_level=0
+	res.ar_lua_Debug=nil
+	res.isStopped=Debugger.VALUE_true
+	res.isBreakPoint=Debugger.VALUE_false
+	res.rapidMode=Debugger.VALUE_false
+	res.stepping=Debugger.VALUE_true
+	res.saved_objects={}
+	res.saved_objects_count=0
+	res.transport=transport
+	res.breakpoints={}
+	res.cstruct=CStruct.new(transport,arg1,arg2)
+	res.cstruct:connect()
+    setmetatable(res,{ __index = Debugger })
+    return res
+end
+--[[
+]]
+
+function Debugger:set_breakpoints()
+	local b=0
+	self.breakpoints={}
+	self.breakpoints_size=0
+	while true do
+		local idx="" .. b
+		local breakpoint=self.cstruct:getVar(idx)
+		if not breakpoint then
+			self.breakpoints_size=b
+			break
+		end
+		self.breakpoints[tostring(breakpoint)]=b
+		b=b+1
+	end
+end
+
+function Debugger:getIsStopped()
+	self.isStopped=self.cstruct:getVar(Variable.isStopped)
+	self.stepping=self.cstruct:getVar(Variable.stepping)
+	self.stack_level_stop=self.cstruct:getVar(Variable.stack_level_stop)
+	if self.cstruct:getVar(Variable.rapidMode)==Debugger.VALUE_true then
+		self.rapidMode=true
+		self.const_free_ticks=10000
+	else
+		self.rapidMode=false
+		self.const_free_ticks=1000
+	end
+	if self.stack_level_stop==-1000 then
+		self.stack_level=0
+	end
+	if self.cstruct:getVar(Variable.reset_filePos) then
+		self.cstruct:reset_filePos()
+	end
+	if self.cstruct:getVar(Variable.breakpointToggled) then
+		self:set_breakpoints()
+	end
+	if self.cstruct:getVar(Variable.terminate) then
+		debug.sethook ()
+		self.isStopped=Debugger.VALUE_false
+	end
+	return self.isStopped
+end
+
+function Debugger:clear_saved_objects()
+	self.saved_objects={}
+	self.saved_objects_count=0
+end
+
+function Debugger:save_object(obj)
+	if not obj then
+		return true
+	end
+	local t=type(obj)
+	if t=="table" or t=="userdata" then
+		if not self.saved_objects[obj] then
+			self.saved_objects[self.saved_objects_count]=obj
+			self.saved_objects[obj]=self.saved_objects_count
+			self.saved_objects_count=self.saved_objects_count+1
+			return self.saved_objects_count-1
+		else
+			return self.saved_objects[obj]
+		end
+	end
+	return true
+end
+
+
+function Debugger:evaluate_expression()
+	local strExpression=self.cstruct:getVar(Evaluate_expression.StrExpression)
+	local code,val=pcall(protectEvaluate,strExpression)
+	self.cstruct:init()
+	self.cstruct:addVar(Evaluate_expression.ReturnStatusCode,code,self:save_object(code))
+	self.cstruct:addVar(Evaluate_expression.ReturnValue,val,self:save_object(val))
+	self.cstruct:write()
+end
+
+function Debugger:write_table()
+	local tab=self.cstruct:getVar(Write_table.Table)
+	local tab_index=tonumber(tab)
+	if tab_index then
+		tab=self.saved_objects[tab_index]
+	else
+		tab=self.ar_lua_Debug
+	end
+	self.cstruct:init()
+	if type(tab)=="userdata" then
+		tab=getmetatable(tab )
+	end
+	if tab then
+		for k,v in pairs(tab) do
+			if k~="__metatable" then
+				self.cstruct:addVar(k,v,self:save_object(v))
+			end
+		end
+	   local mt=getmetatable(tab )
+	   if mt then
+	     self.cstruct:addVar("__metatable",mt,self:save_object(mt))
+	   end
+	end
+	self.cstruct:write()
+end
+
+function Debugger:write_frames()
+	local thread=self.cstruct:getVar(Call_debug_getinfo.Thread)
+	local what=self.cstruct:getVar(Call_debug_getinfo.What)
+	local level=0
+	local ar
+	self.cstruct:init()
+	while true do
+		if thread then
+			ar=debug.getinfo(thread,level,what)
+		else
+			ar=debug.getinfo(level,what)
+		end
+		if not ar then
+			break
+		end
+		self.cstruct:addVar(level .. "currentline",ar.currentline)
+		self.cstruct:addVar(level .. "source",ar.source)
+		self.cstruct:addVar(level .. "name",ar.name)
+		level=level+1
+	end
+	self.cstruct:write()
+end
+
+function Debugger:call_debug_getinfo()
+	local thread=self.cstruct:getVar(Call_debug_getinfo.Thread)
+	local func=self.cstruct:getVar(Call_debug_getinfo.Function)
+	local what=self.cstruct:getVar(Call_debug_getinfo.What)
+	if thread then
+		self.ar_lua_Debug=debug.getinfo(thread,func,what)
+	else
+		self.ar_lua_Debug=debug.getinfo(func,what)
+	end
+	self.cstruct:init()
+	self.cstruct:addVar(Call_debug_getinfo.Return,self.ar_lua_Debug,true)
+	self.cstruct:write()
+end
+
+function Debugger:write_locals()
+	local thread=self.cstruct:getVar(Call_debug_getlocal.Thread)
+	local level=self.cstruct:getVar(Call_debug_getlocal.Level)
+	local retName,retVal
+	local local_idx=1
+	self.cstruct:init()
+	self.cstruct:addVar("_G",_G,self:save_object(_G))
+	local retName,retVal
+	while true do
+		if thread then
+			retName,retVal=debug.getlocal(thread,level,local_idx)
+		else
+			retName,retVal=debug.getlocal(level,local_idx)
+		end
+		if not retName then
+			break
+		end
+		self.cstruct:addVar(retName,retVal,self:save_object(retVal))
+		local_idx=local_idx+1
+	end
+	local func = debug.getinfo(level, "f").func
+	local_idx = 1
+	
+	while true do
+		retName,retVal = debug.getupvalue(func, local_idx)
+		if not retName then break end
+		self.cstruct:addVar(retName,retVal,self:save_object(retVal))
+		local_idx=local_idx+1
+	end 	
+	self.cstruct:write()
+end
+
+function Debugger:call_debug_getlocal()
+	local thread=self.cstruct:getVar(Call_debug_getlocal.Thread)
+	local level=self.cstruct:getVar(Call_debug_getlocal.Level)
+	local local_idx=self.cstruct:getVar(Call_debug_getlocal.Local)
+	local retName,retVal
+	if thread then
+		retName,retVal=debug.getlocal(thread,level,local_idx)
+	else
+		retName,retVal=debug.getlocal(level,local_idx)
+	end
+	self.cstruct:init()
+	self.cstruct:addVar(Call_debug_getlocal.ReturnName,retName,true)
+	self.cstruct:addVar(Call_debug_getlocal.ReturnValue,retVal,self:save_object(retVal))
+	self.cstruct:write()
+end
+
+
+function Debugger:getCommand()
+	if self.cstruct:getVar(Command.Name) then
+		return self.cstruct:getVar(Command.Name)
+	end
+	return Command.NotExists
+end
+
+function Debugger:processCommand()
+
+	self.cstruct:readTable()
+	local cmd=self:getCommand()
+	if cmd==Command.CallMethod then
+		local method=self.cstruct:getVar(Method.Name)
+		if method==Method.Write_table then
+			self:write_table()
+		elseif method==Method.Call_debug_getinfo then
+			self:call_debug_getinfo()
+		elseif method==Method.Call_debug_getlocal then
+			self:call_debug_getlocal()
+		elseif method==Method.Write_frames then
+			self:write_frames()
+		elseif method==Method.Write_locals then
+			self:write_locals()
+		elseif method==Method.Evaluate_expression then
+			self:evaluate_expression()
+		end
+	else
+		self:getIsStopped()
+	end
+	return self.isStopped
+end
+
+function Debugger:existBreakpoint(line)
+	if not self.breakpoints[tostring(line)] then
+		return false
+	end
+	local level=0
+	local ar
+	local key=""
+	while true do
+		ar=debug.getinfo(level,"nSlu")
+		if not ar then
+			break
+		end
+		if ar.currentline~=-1 and not string.find (ar.source, self.DEBUGGER_SCRIPT ,  1,true) then
+			key=ar.currentline .. ar.source
+			break
+		end
+		level=level+1
+	end
+	--print(key)
+	if not self.breakpoints[key] then
+		return false
+	end
+	return true
+end
+
+function Debugger:write_isStopped()
+	self.cstruct:init()
+	self.cstruct:addVar(Variable.isStopped,self.isStopped)
+	self.cstruct:addVar(Variable.isBreakPoint,self.isBreakPoint)
+	self.cstruct:addVar(Variable.stepping,self.stepping)
+	self.cstruct:addVar(Variable.stack_level,self.stack_level)
+	self.cstruct:write()
+end
+
+function Debugger:trace(str)
+	--if self.line==43 then
+		print(str)
+		io.flush()
+	--end
+
+end
+
+function Debugger:setStackLevel()
+	local level=0
+	local ar
+	while true do
+		ar=debug.getinfo(level,"l")
+		if not ar then
+			break
+		end
+		level=level+1
+	end
+	self.stack_level=level
+
+--[[
+	if self.debuggingType==DebuggingType.PSP then
+		if event == "call" then
+			self.stack_level = self.stack_level + 1
+			return
+		elseif event == "return" then
+			self.stack_level = self.stack_level - 1
+			return
+		end  	
+	else
+		local level=0
+		local ar
+		while true do
+			ar=debug.getinfo(level,"nSlu")
+			if not ar then
+				break
+			end
+			level=level+1
+		end
+		self.stack_level=level
+	end
+]]
+
+end
+
+function Debugger:leaveDebugger()
+	if self.isBreakPoint==Debugger.VALUE_true then
+		return false
+	end
+	local clock=os.clock()
+	if clock-self.prev_os_clock > 1.5 then
+		self.current_tick=self.const_free_ticks
+	end
+	self.prev_os_clock=clock 
+	if self.stepping==Debugger.VALUE_false then
+		if self.current_tick<self.const_free_ticks then
+			self.current_tick=self.current_tick+1
+			return true
+		end
+		self.current_tick=0
+		self:write_isStopped()
+		self.cstruct:readTable()
+		self:getIsStopped()
+		if self.isStopped==Debugger.VALUE_false then
+			return true
+		end
+	end
+	return false
+end
+
+
+function Debugger:step(event,line)
+	self.line=line
+	self.isBreakPoint=Debugger.VALUE_false
+	if self:existBreakpoint(line) then
+		self:setStackLevel()
+		self.isBreakPoint=Debugger.VALUE_true
+		self.stepping=Debugger.VALUE_true
+	else
+		if self.rapidMode and self:leaveDebugger() then
+			return
+		end
+		self:setStackLevel()
+		if self.stack_level<=self.stack_level_stop then
+			self.stepping=Debugger.VALUE_true
+		end
+	end
+	if self:leaveDebugger() then
+		return
+	end
+	io.flush()
+	self:clear_saved_objects()
+	self.isStopped=Debugger.VALUE_true
+	self:write_isStopped()
+	self.current_tick=0
+	while self:processCommand()==Debugger.VALUE_true do
+
+	end
+end
+
+local function debug_hook_function(event,line)
+	debugger:step(event,line)
+end
+
+-----------------------------------------------
+--[[
+javaFile=io.open("Lua2Java.java","w")
+javaFile:write("//  \\/  \\/  \\/  \\/  \\/  \\/\n")
+createJava("ExecutionMode",ExecutionMode)
+createJava("Variable",Variable)
+createJava("Command",Command)
+createJava("Method",Method)
+createParamMethods()
+javaFile:write("//  /\\  /\\  /\\  /\\  /\\  /\\\n")
+javaFile:close()
+]]
+-----------------------------------
+
+
+--------------------------------------------
+
+
+local debuggingType=1  
+local executionMode=ExecutionMode.StandaloneLua
+local executableScript="untitled.lua"
+local DEBUGGER_SCRIPT="__________DEBUGGER_SCRIPT"
+if not __________debugger_global then
+	local transport=Transport.Socket
+	if transport==Transport.Socket then 
+		__________debugger_global=Debugger.new(Transport.Socket,"127.0.0.1",8000)
+	elseif transport==Transport.FileSystem then
+		__________debugger_global=Debugger.new(Transport.FileSystem,"/Users/contrarian/github/local/Engine_Exploration/.metadata/.plugins/net.sf.akdebugger.core/ch1","/Users/contrarian/github/local/Engine_Exploration/.metadata/.plugins/net.sf.akdebugger.core/ch0")
+	end
+	__________debugger_global.DEBUGGER_SCRIPT=DEBUGGER_SCRIPT
+	__________debugger_global.executionMode=executionMode
+	__________debugger_global.debuggingType=debuggingType
+	if debuggingType==DebuggingType.CoronaSDKonWindows then
+		__________debugger_global.const_free_ticks=500
+	end
+	
+	debugger=__________debugger_global
+end
+
+
+
+
+--------------------------------------------
+if debugger then
+	if executionMode==ExecutionMode.StandaloneLua then
+		if arg and arg[0] then
+			arg[0]=executableScript
+		end
+	end
+	if debuggingType==DebuggingType.PSP then
+		debug.sethook (debug_hook_function, "l")--"crl")  
+	else
+		debug.sethook (debug_hook_function, "l")
+	end
+	if executionMode==ExecutionMode.StandaloneLua then
+		dofile(executableScript)
+		io.flush()
+	end
+	
+end

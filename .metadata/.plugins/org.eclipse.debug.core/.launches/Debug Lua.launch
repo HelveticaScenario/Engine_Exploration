@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<launchConfiguration type="net.sf.akdebugger.core.launchConfigurationType.lua">
+<intAttribute key="net.sf.akdebugger.lua.ATTR_DEBUGGING_TYPE" value="1"/>
+<stringAttribute key="net.sf.akdebugger.lua.ATTR_LUA_INTERPRETER" value="/usr/local/Cellar/lua/5.1.4/bin/lua"/>
+<stringAttribute key="net.sf.akdebugger.lua.ATTR_LUA_PROGRAM" value="/LOVEdev/src/untitled.lua"/>
+<booleanAttribute key="net.sf.akdebugger.lua.ATTR_SEARCH_PORT" value="false"/>
+<stringAttribute key="net.sf.akdebugger.lua.ATTR_SOCKET_HOST" value="127.0.0.1"/>
+<stringAttribute key="net.sf.akdebugger.lua.ATTR_SOCKET_PORT" value="8000"/>
+<booleanAttribute key="net.sf.akdebugger.lua.ATTR_STOP_ON_STARTUP" value="true"/>
+<booleanAttribute key="net.sf.akdebugger.lua.ATTR_USE_LUASOCKET" value="true"/>
+</launchConfiguration>
