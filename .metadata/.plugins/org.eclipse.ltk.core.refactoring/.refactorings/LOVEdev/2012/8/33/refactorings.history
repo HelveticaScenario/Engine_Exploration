@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Rename source module &apos;untitled.lua&apos; to &apos;GoLalgorithmTest.lua&apos;&#x0A;- Original element: &apos;(default package).untitled.lua&apos;&#x0A;- Renamed element: &apos;(default package).GoLalgorithmTest.lua&apos;" description="Rename source module &apos;untitled.lua&apos;" flags="589830" id="org.eclipse.dltk.ui.rename.sourcemodule" input="/src&lt;{untitled.lua" name="GoLalgorithmTest.lua" stamp="1344742825083" version="1.0"/>
+</session>

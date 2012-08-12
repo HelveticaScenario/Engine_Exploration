@@ -1,16 +1,10 @@
 <?xml version="1.0" encoding="ASCII"?>
-<cache:CacheIndex xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:cache="http://eclipse.org/dltk/cache_model" lastIndex="710" environment="org.eclipse.dltk.core.environment.localEnvironment">
+<cache:CacheIndex xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:cache="http://eclipse.org/dltk/cache_model" lastIndex="718" environment="org.eclipse.dltk.core.environment.localEnvironment">
   <entries path="/Users/contrarian/github/local/Engine_Exploration/LOVEdev/src/conf.lua" timestamp="1343452058000" lastAccessTime="1344100105501">
     <attributes name="indexed" location="2838196607/1260902296/221.idx"/>
   </entries>
-  <entries path="/Users/contrarian/github/local/Engine_Exploration/LOVEdev/src/map.lua" timestamp="1343689942000" lastAccessTime="1344100105378">
-    <attributes name="indexed" location="2838196607/1260902296/485.idx"/>
-  </entries>
   <entries path="/Users/contrarian/github/local/Engine_Exploration/LOVEdev/src/archive/boundingBoxes.lua" timestamp="1343452052000" lastAccessTime="1344100105573">
     <attributes name="indexed" location="2838196607/2859459368/683.idx"/>
-  </entries>
-  <entries path="/Users/contrarian/github/local/Engine_Exploration/LOVEdev/src/archive" timestamp="1344036274000" lastAccessTime="1344100105259">
-    <attributes name=".dltk.core.archive.cache.lastaccess" location="2838196607/1260902296/3.idx"/>
   </entries>
   <entries path="/Users/contrarian/github/local/Engine_Exploration/LOVEdev/src/archive/main2.lua" timestamp="1343452005000" lastAccessTime="1344100105379">
     <attributes name="indexed" location="2838196607/2859459368/603.idx"/>
@@ -1097,13 +1091,7 @@
   <entries path="/Users/contrarian/github/local/Engine_Exploration/LOVEdev/src/libs/beholder/README.textile" timestamp="1330980254000" lastAccessTime="1344049875722"/>
   <entries path="/Users/contrarian/github/local/Engine_Exploration/LOVEdev/src/libs/love-loader/MIT-LICENSE.txt" timestamp="1336510796000" lastAccessTime="1344049875723"/>
   <entries path="/Users/contrarian/github/local/Engine_Exploration/LOVEdev/src/libs/love-loader/README.textile" timestamp="1336510796000" lastAccessTime="1344049875723"/>
-  <entries path="/Users/contrarian/github/local/Engine_Exploration/LOVEdev/src/debugger.lua" timestamp="1335251335000" lastAccessTime="1344294014670"/>
-  <entries path="/Users/contrarian/github/local/Engine_Exploration/LOVEdev/src/debugintrospection.lua" timestamp="1335251343000" lastAccessTime="1344294021312"/>
   <entries path="/Users/contrarian/github/local/Engine_Exploration/LOVEdev/src/untitled" timestamp="1344062240000" lastAccessTime="1344100105260"/>
-  <entries path="/Users/contrarian/github/local/Engine_Exploration/LOVEdev/src" timestamp="1344147572000" lastAccessTime="1344321978551">
-    <attributes name=".dltk.core.archive.cache.lastaccess" location="2838196607/564643866/703.idx"/>
-  </entries>
-  <entries path="/Users/contrarian/github/local/Engine_Exploration/LOVEdev/src/luaExperiment.lua" timestamp="1344110993000" lastAccessTime="1344294021381"/>
   <entries path="/Users/contrarian/github/local/Engine_Exploration/LOVEdev/src/moon/all.lua" timestamp="1330561930000" lastAccessTime="1344294023637"/>
   <entries path="/Users/contrarian/github/local/Engine_Exploration/LOVEdev/src/moon" timestamp="1330561930000" lastAccessTime="1344294023688">
     <attributes name=".dltk.core.archive.cache.lastaccess" location="2838196607/1260902296/705.idx"/>
@@ -1130,4 +1118,12 @@
   <entries path="/Users/contrarian/github/local/Engine_Exploration/LOVEdev/src/moonscript/compile/value.lua" timestamp="1330561930000" lastAccessTime="1344294026358"/>
   <entries path="/Users/contrarian/github/local/Engine_Exploration/LOVEdev/src/moonscript.lua" timestamp="1330561930000" lastAccessTime="1344294026927"/>
   <entries path="/Users/contrarian/github/local/Engine_Exploration/LOVEdev/src/main.lua" timestamp="1344312518000" lastAccessTime="1344312519118"/>
+  <entries path="/Users/contrarian/github/local/Engine_Exploration/LOVEdev/src/archive/gameOfLifeFree.lua" timestamp="1344741268000" lastAccessTime="1344742752241"/>
+  <entries path="/Users/contrarian/github/local/Engine_Exploration/LOVEdev/src/archive/gameOfLifeGrid.lua" timestamp="1343884175000" lastAccessTime="1344742753339"/>
+  <entries path="/Users/contrarian/github/local/Engine_Exploration/LOVEdev/src" timestamp="1344742825000" lastAccessTime="1344742825581">
+    <attributes name=".dltk.core.archive.cache.lastaccess" location="2838196607/564643866/715.idx"/>
+  </entries>
+  <entries path="/Users/contrarian/github/local/Engine_Exploration/LOVEdev/src/archive" timestamp="1344742832000" lastAccessTime="1344742833226">
+    <attributes name=".dltk.core.archive.cache.lastaccess" location="2838196607/1260902296/717.idx"/>
+  </entries>
 </cache:CacheIndex>

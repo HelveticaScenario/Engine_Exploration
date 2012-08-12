@@ -710,3 +710,9 @@ java.lang.StringIndexOutOfBoundsException: String index out of range: 4802
 
 !ENTRY net.sf.akdebugger.lua 4 0 2012-08-07 00:20:06.944
 !MESSAGE Lua VM is already running.
+
+!ENTRY org.eclipse.ui 4 4 2012-08-11 22:26:44.944
+!MESSAGE Plug-in 'org.eclipse.dltk.ui' contributed an invalid Menu Extension (Path: 'org.eclipse.dltk.ui.refactoring.menu' is invalid): org.eclipse.dltk.ui.actions.Move
+
+!ENTRY org.eclipse.ui 4 4 2012-08-11 22:26:45.020
+!MESSAGE Plug-in 'org.eclipse.dltk.ui' contributed an invalid Menu Extension (Path: 'org.eclipse.dltk.ui.refactoring.menu' is invalid): org.eclipse.dltk.ui.actions.Rename
