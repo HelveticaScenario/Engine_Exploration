@@ -1,0 +1,19 @@
+/*
+ * test.cpp
+ *
+ *  Created on: Aug 24, 2012
+ *      Author: contrarian
+ */
+#include <iostream>
+#include <SDL.h>
+//#include "Box2D/Box2D.h"
+
+using namespace std;
+
+int main(){
+	cout << "Hey Buddy!" << endl;
+	return 0;
+}
+
+
+

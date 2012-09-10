@@ -1,0 +1,69 @@
+2012-08-12 19:26:03,520 INFO  [org.eclim.eclipse.EclimDaemon] Workspace: /Users/contrarian/github/local/Engine_Exploration
+2012-08-12 19:26:03,521 INFO  [org.eclim.eclipse.EclimDaemon] Starting eclim...
+2012-08-12 19:26:03,617 INFO  [org.eclim.eclipse.EclimDaemon] Loading plugin org.eclim
+2012-08-12 19:26:03,617 INFO  [org.eclim.eclipse.EclimDaemon] Loading plugin org.eclim.core
+2012-08-12 19:26:03,950 INFO  [org.eclim.plugin.core.CorePlugin] Loading eclim plugins...
+2012-08-12 19:26:03,954 INFO  [org.eclim.plugin.core.CorePlugin] Loading plugin org.eclim.cdt
+2012-08-12 19:26:03,962 INFO  [org.eclim.plugin.core.CorePlugin] Loading plugin org.eclim.dltk
+2012-08-12 19:26:03,968 INFO  [org.eclim.plugin.core.CorePlugin] Loading plugin org.eclim.dltkruby
+2012-08-12 19:26:03,971 INFO  [org.eclim.plugin.core.CorePlugin] Loading plugin org.eclim.jdt
+2012-08-12 19:26:04,078 INFO  [org.eclim.plugin.core.CorePlugin] Loading plugin org.eclim.pdt
+2012-08-12 19:26:04,092 INFO  [org.eclim.plugin.core.CorePlugin] Loading plugin org.eclim.wst
+2012-08-12 19:26:04,191 INFO  [org.eclim.plugin.core.CorePlugin] Plugins loaded.
+2012-08-12 19:26:04,191 INFO  [org.eclim.eclipse.EclimDaemon] Loaded plugin org.eclim.core
+2012-08-12 19:26:04,193 INFO  [org.eclim.eclipse.EclimDaemon] Eclim Server Started on: 127.0.0.1:9091
+2012-08-12 19:34:28,529 INFO  [org.eclim.eclipse.EclimDaemon] Shutting down eclim...
+2012-08-12 19:34:28,531 INFO  [org.eclim.eclipse.EclimDaemon] Stopping plugin org.eclim.core
+2012-08-12 19:34:28,533 INFO  [org.eclim.plugin.core.CorePlugin] Stopping plugin org.eclim.cdt
+2012-08-12 19:34:28,534 INFO  [org.eclim.plugin.core.CorePlugin] Stopping plugin org.eclim.dltk
+2012-08-12 19:34:28,535 INFO  [org.eclim.plugin.core.CorePlugin] Stopping plugin org.eclim.dltkruby
+2012-08-12 19:34:28,535 INFO  [org.eclim.plugin.core.CorePlugin] Stopping plugin org.eclim.jdt
+2012-08-12 19:34:28,535 INFO  [org.eclim.plugin.core.CorePlugin] Stopping plugin org.eclim.pdt
+2012-08-12 19:34:28,535 INFO  [org.eclim.plugin.core.CorePlugin] Stopping plugin org.eclim.wst
+2012-08-12 19:34:28,536 INFO  [org.eclim.eclipse.EclimDaemon] Eclim stopped.
+2012-08-24 18:34:28,091 INFO  [org.eclim.eclipse.EclimDaemon] Workspace: /Users/contrarian/github/local/Engine_Exploration
+2012-08-24 18:34:28,179 INFO  [org.eclim.eclipse.EclimDaemon] Starting eclim...
+2012-08-24 18:34:28,519 INFO  [org.eclim.eclipse.EclimDaemon] Loading plugin org.eclim
+2012-08-24 18:34:28,519 INFO  [org.eclim.eclipse.EclimDaemon] Loading plugin org.eclim.core
+2012-08-24 18:34:28,872 INFO  [org.eclim.plugin.core.CorePlugin] Loading eclim plugins...
+2012-08-24 18:34:28,970 INFO  [org.eclim.plugin.core.CorePlugin] Loading plugin org.eclim.cdt
+2012-08-24 18:34:29,059 INFO  [org.eclim.plugin.core.CorePlugin] Loading plugin org.eclim.dltk
+2012-08-24 18:34:29,064 INFO  [org.eclim.plugin.core.CorePlugin] Loading plugin org.eclim.dltkruby
+2012-08-24 18:34:29,066 INFO  [org.eclim.plugin.core.CorePlugin] Loading plugin org.eclim.jdt
+2012-08-24 18:34:29,110 INFO  [org.eclim.plugin.core.CorePlugin] Loading plugin org.eclim.pdt
+2012-08-24 18:34:29,149 INFO  [org.eclim.plugin.core.CorePlugin] Loading plugin org.eclim.wst
+2012-08-24 18:34:29,167 INFO  [org.eclim.plugin.core.CorePlugin] Plugins loaded.
+2012-08-24 18:34:29,167 INFO  [org.eclim.eclipse.EclimDaemon] Loaded plugin org.eclim.core
+2012-08-24 18:34:29,168 INFO  [org.eclim.eclipse.EclimDaemon] Eclim Server Started on: 127.0.0.1:9091
+2012-08-24 19:52:37,219 INFO  [org.eclim.eclipse.EclimDaemon] Shutting down eclim...
+2012-08-24 19:52:37,250 INFO  [org.eclim.eclipse.EclimDaemon] Stopping plugin org.eclim.core
+2012-08-24 19:52:37,297 INFO  [org.eclim.plugin.core.CorePlugin] Stopping plugin org.eclim.cdt
+2012-08-24 19:52:37,298 INFO  [org.eclim.plugin.core.CorePlugin] Stopping plugin org.eclim.dltk
+2012-08-24 19:52:37,298 INFO  [org.eclim.plugin.core.CorePlugin] Stopping plugin org.eclim.dltkruby
+2012-08-24 19:52:37,298 INFO  [org.eclim.plugin.core.CorePlugin] Stopping plugin org.eclim.jdt
+2012-08-24 19:52:37,299 INFO  [org.eclim.plugin.core.CorePlugin] Stopping plugin org.eclim.pdt
+2012-08-24 19:52:37,299 INFO  [org.eclim.plugin.core.CorePlugin] Stopping plugin org.eclim.wst
+2012-08-24 19:52:37,312 INFO  [org.eclim.eclipse.EclimDaemon] Eclim stopped.
+2012-08-24 20:20:09,977 INFO  [org.eclim.eclipse.EclimDaemon] Workspace: /Users/contrarian/github/local/Engine_Exploration
+2012-08-24 20:20:09,981 INFO  [org.eclim.eclipse.EclimDaemon] Starting eclim...
+2012-08-24 20:20:10,030 INFO  [org.eclim.eclipse.EclimDaemon] Loading plugin org.eclim
+2012-08-24 20:20:10,030 INFO  [org.eclim.eclipse.EclimDaemon] Loading plugin org.eclim.core
+2012-08-24 20:20:10,346 INFO  [org.eclim.plugin.core.CorePlugin] Loading eclim plugins...
+2012-08-24 20:20:10,351 INFO  [org.eclim.plugin.core.CorePlugin] Loading plugin org.eclim.cdt
+2012-08-24 20:20:10,366 INFO  [org.eclim.plugin.core.CorePlugin] Loading plugin org.eclim.dltk
+2012-08-24 20:20:10,385 INFO  [org.eclim.plugin.core.CorePlugin] Loading plugin org.eclim.dltkruby
+2012-08-24 20:20:10,389 INFO  [org.eclim.plugin.core.CorePlugin] Loading plugin org.eclim.jdt
+2012-08-24 20:20:10,395 INFO  [org.eclim.plugin.core.CorePlugin] Loading plugin org.eclim.pdt
+2012-08-24 20:20:10,406 INFO  [org.eclim.plugin.core.CorePlugin] Loading plugin org.eclim.wst
+2012-08-24 20:20:10,437 INFO  [org.eclim.plugin.core.CorePlugin] Plugins loaded.
+2012-08-24 20:20:10,438 INFO  [org.eclim.eclipse.EclimDaemon] Loaded plugin org.eclim.core
+2012-08-24 20:20:10,438 INFO  [org.eclim.eclipse.EclimDaemon] Eclim Server Started on: 127.0.0.1:9091
+2012-09-02 13:40:20,091 INFO  [org.eclim.eclipse.EclimDaemon] Shutting down eclim...
+2012-09-02 13:40:20,606 INFO  [org.eclim.eclipse.EclimDaemon] Stopping plugin org.eclim.core
+2012-09-02 13:40:21,150 INFO  [org.eclim.plugin.core.CorePlugin] Stopping plugin org.eclim.cdt
+2012-09-02 13:40:21,208 INFO  [org.eclim.plugin.core.CorePlugin] Stopping plugin org.eclim.dltk
+2012-09-02 13:40:21,208 INFO  [org.eclim.plugin.core.CorePlugin] Stopping plugin org.eclim.dltkruby
+2012-09-02 13:40:21,208 INFO  [org.eclim.plugin.core.CorePlugin] Stopping plugin org.eclim.jdt
+2012-09-02 13:40:21,209 INFO  [org.eclim.plugin.core.CorePlugin] Stopping plugin org.eclim.pdt
+2012-09-02 13:40:21,209 INFO  [org.eclim.plugin.core.CorePlugin] Stopping plugin org.eclim.wst
+2012-09-02 13:40:21,482 INFO  [org.eclim.eclipse.EclimDaemon] Eclim stopped.

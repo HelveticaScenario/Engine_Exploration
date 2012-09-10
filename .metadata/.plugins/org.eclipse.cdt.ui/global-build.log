@@ -1,0 +1,89 @@
+18:23:06 **** Incremental Build of configuration Debug for project LearnC++ ****
+make all 
+Building file: ../src/test.cpp
+Invoking: GCC C++ Compiler
+g++ -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"src/test.d" -MT"src/test.d" -o "src/test.o" "../src/test.cpp"
+Finished building: ../src/test.cpp
+ 
+Building target: LearnC++
+Invoking: MacOS X C++ Linker
+g++  -o "LearnC++"  ./src/test.o   
+Undefined symbols for architecture x86_64:
+  "_main", referenced from:
+      start in crt1.10.6.o
+     (maybe you meant: SDL_main())
+ld: symbol(s) not found for architecture x86_64
+collect2: ld returned 1 exit status
+make: *** [LearnC++] Error 1
+18:23:11 **** Incremental Build of configuration Debug for project LearnC++ ****
+make all 
+Building target: LearnC++
+Invoking: MacOS X C++ Linker
+g++  -o "LearnC++"  ./src/test.o   
+Undefined symbols for architecture x86_64:
+  "_main", referenced from:
+      start in crt1.10.6.o
+     (maybe you meant: SDL_main())
+ld: symbol(s) not found for architecture x86_64
+collect2: ld returned 1 exit status
+make: *** [LearnC++] Error 1
+18:24:09 **** Incremental Build of configuration Debug for project LearnC++ ****
+make all 
+Building target: LearnC++
+Invoking: MacOS X C++ Linker
+g++  -o "LearnC++"  ./src/test.o   
+Undefined symbols for architecture x86_64:
+  "_main", referenced from:
+      start in crt1.10.6.o
+     (maybe you meant: SDL_main())
+ld: symbol(s) not found for architecture x86_64
+collect2: ld returned 1 exit status
+make: *** [LearnC++] Error 1
+18:24:16 **** Incremental Build of configuration Debug for project LearnC++ ****
+make all 
+Building target: LearnC++
+Undefined symbols for architecture x86_64:
+  "_main", referenced from:
+      start in crt1.10.6.o
+     (maybe you meant: SDL_main())
+ld: symbol(s) not found for architecture x86_64
+collect2: ld returned 1 exit status
+make: *** [LearnC++] Error 1
+Invoking: MacOS X C++ Linker
+g++  -o "LearnC++"  ./src/test.o   
+18:24:26 **** Incremental Build of configuration Debug for project LearnC++ ****
+make all 
+Building target: LearnC++
+Invoking: MacOS X C++ Linker
+g++  -o "LearnC++"  ./src/test.o   
+Undefined symbols for architecture x86_64:
+  "_main", referenced from:
+      start in crt1.10.6.o
+     (maybe you meant: SDL_main())
+ld: symbol(s) not found for architecture x86_64
+collect2: ld returned 1 exit status
+make: *** [LearnC++] Error 1
+18:25:20 **** Incremental Build of configuration Debug for project LearnC++ ****
+make all 
+Building target: LearnC++
+Invoking: MacOS X C++ Linker
+g++  -o "LearnC++"  ./src/test.o   
+Undefined symbols for architecture x86_64:
+  "_main", referenced from:
+      start in crt1.10.6.o
+     (maybe you meant: SDL_main())
+ld: symbol(s) not found for architecture x86_64
+collect2: ld returned 1 exit status
+make: *** [LearnC++] Error 1
+18:25:53 **** Incremental Build of configuration Debug for project LearnC++ ****
+make all 
+Building target: LearnC++
+Invoking: MacOS X C++ Linker
+g++  -o "LearnC++"  ./src/test.o   
+Undefined symbols for architecture x86_64:
+  "_main", referenced from:
+      start in crt1.10.6.o
+     (maybe you meant: SDL_main())
+ld: symbol(s) not found for architecture x86_64
+collect2: ld returned 1 exit status
+make: *** [LearnC++] Error 1

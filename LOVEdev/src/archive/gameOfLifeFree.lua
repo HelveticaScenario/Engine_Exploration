@@ -10,10 +10,15 @@ function load()
 	addToNewAliveList(alive, 8, 4)
 	addToNewAliveList(alive, 8, 2)
 	addToNewAliveList(alive, 9, 3)
+	love.graphics.setLine(1,"rough")
+	stagnent = false
 	generation = 0
+	frameMode = 0
 	time = 0
+	step = 1
+	grid = 1
 	vp = initViewPort(16)
-	pop = 5
+	pop = 10
 	leftX = findHorizOffset(vp)
 	topY = findVertOffset(vp)
 	x = 0
@@ -22,51 +27,67 @@ function load()
 --	next_time = love.timer.getMicroTime()	--	works to cap FPS
 --	checkClock = 0
 --	interval = 3
+	rotate = 0
 	pause = 1
 	mouse_x = 0
 	mouse_y = 0
-	speed = 1
-	timer = 10
+	speed = 5
+	timer = 1
 	love.keyboard.setKeyRepeat(1,0)
 end
 
---function love.keypressed(key,unicode)
---	if key == " " then
---		pause = (pause + 1) % 2
-----		love.timer.sleep(.1)
---	end
---end
-
-function update(dt)
---	next_time = next_time + min_dt --	Caps FPS
-	time = time + dt
-	_dt = dt
-	if timer > 0 then
-		timer = timer - dt
-		if timer < 0 then
-			timer = 0
-		end
-	end
-	mouse_x, mouse_y = love.mouse.getPosition()
-	mouse_x = math.floor((mouse_x - leftX.actual + leftX.virtual) / vp.tileSize)
-	mouse_y = math.floor((mouse_y - topY.actual + topY.virtual) / vp.tileSize)
-	if love.keyboard.isDown("q") then
+function love.keypressed(key,unicode)
+	if key == "q" then
 --		print(time, generation, #alive, pop)
 --		for i=1, #alive do
 --			print(alive[i].x, alive[i].y)
 --		end
 		love.event.push("quit",a,b,c,d)
 	end
-	if love.keyboard.isDown("/","?") then
-		if timer == 0 then timer = 15
+	if key == ("/" or "?") then
+		if timer == 0 then timer = 1
 		elseif timer > 0 then timer = 0
 		end	
 --		love.timer.sleep(0.1)
 	end
-	if love.keyboard.isDown(" ") then
+	if key == "i" then
+		rotate = rotate + 0.1
+--		step = step + 1
+----		love.timer.sleep(0.1)
+	end
+	if key == "o" then
+		rotate = rotate - 0.1
+--		if step > 1 then step = step - 1 end
+----		love.timer.sleep(0.1)
+	end
+	if key == " " then
 		pause = (pause + 1) % 2
 --		love.timer.sleep(.1)
 	end
+	if key == "f" then
+		frameMode = (frameMode + 1) % 2
+	end
+	if key == "g" then
+		grid = (grid + 1) % 2
+	end
+end
+
+function update(dt)
+--	next_time = next_time + min_dt --	Caps FPS
+	time = time + dt
+	_dt = dt
+--	if timer > 0 then
+--		timer = timer - dt
+--		if timer < 0 then
+--			timer = 0
+--		end
+--	end
+	mouse_x, mouse_y = love.mouse.getPosition()
+	mouse_x = math.floor((mouse_x - leftX.actual + leftX.virtual) / vp.tileSize)
+	mouse_y = math.floor((mouse_y - topY.actual + topY.virtual) / vp.tileSize)
+	
+	
+	
 	if love.keyboard.isDown("lalt") then
 		if love.keyboard.isDown("lctrl") and speed > .1 then
 			speed = speed - .1
@@ -76,10 +97,14 @@ function update(dt)
 			--love.timer.sleep(0.1)
 		end
 	elseif love.keyboard.isDown("lctrl") and vp.tileSize > 1 then
-		vp.tileSize = vp.tileSize - 1
+		vp.tileSize = vp.tileSize * 0.99
+		topY = findVertOffset(vp)
+		leftX = findHorizOffset(vp)
 --		love.timer.sleep(0.1)
 	elseif love.keyboard.isDown("lshift") then
-		vp.tileSize = vp.tileSize + 1
+		vp.tileSize = vp.tileSize * 1.01
+		topY = findVertOffset(vp)
+		leftX = findHorizOffset(vp)
 --		love.timer.sleep(0.1)
 	end
 	if love.keyboard.isDown("down")  then
@@ -102,34 +127,50 @@ function update(dt)
 		vp.right = vp.right + speed
 		leftX = findHorizOffset(vp)
 	end
+	if love.keyboard.isDown("c")  then
+		alive = {}
+		generation = 0
+		pop = 0
+		pause = 1
+		stagnent = false
+	end
 	if love.mouse.isDown("l") then
-		alive = drawToLiving(alive, vp, leftX, topY, false)	
+		alive = drawToLiving(alive, vp, leftX, topY, false)
+		pop = pop + 1	
 	end
 	if love.mouse.isDown("r") then
 		alive = drawToLiving(alive, vp, leftX, topY, true)
-		--love.timer.sleep(.5)	
+		--love.timer.sleep(.5)
+		if pop < 0 then pop = pop - 1 end	
 	end
+	if pop == 0 or stagnent == true then pause = 1 end
+	
 	if pause == 0 then
-		alive, generation, pop = iterateGeneration(alive, generation)
-		--		if generation > 2 then
-		--			print(time, generation, #alive, pop)
-		--			for i=1, #alive do
-		--				print(alive[i].x, alive[i].y)
-		--			end
-		--			love.event.push("quit",a,b,c,d)
-		--		end
+		for i=1, step do
+			alive, generation, pop, stagnent = iterateGeneration(alive, generation)
+		end
+--		if generation > 1000 then
+--			print(time)
+----			for i=1, #alive do
+----				print(alive[i].x, alive[i].y)
+----			end
+--			love.event.push("quit",a,b,c,d)
+--		end
 --		for i=1, #alive do
 --			print(alive[i].x, alive[i].y)  
 --		end
 --		print("\n")
-		--pause = 1
+		if frameMode == 1 then
+			pause = 1
+		end
 		--love.timer.sleep(.2)
 	end
 end
 
 function draw()	
-	love.graphics.line(width,0,width,height)
-	love.graphics.line(0,height,width,height)
+	love.graphics.line(vp.width,0,vp.width,vp.height) -- vert
+	love.graphics.line(0,vp.height,vp.width,vp.height) -- horiz
+	
 	drawDisplay(alive, vp, leftX, topY)
 	if timer > 0 then
 		love.graphics.print(
@@ -139,6 +180,10 @@ left mouse button adds new alive cell at pointer,
 right mouse button removes cell at pointer,
 hold alt and left shift to increase movement speed,
 hold alt and left control to decrease movement speed,
+c clears the screen and pauses the game,
+f toggles frameMode where the spacebar iterates one
+generation at a time,
+i and o speed and slow the speed of the updates,
 ? or / to toggle this text]] 
 							.. "\n\n" ..		
 							"leftX.actual is " .. leftX.actual .. "\n" .. 
@@ -162,12 +207,18 @@ hold alt and left control to decrease movement speed,
 	--						b
 							,10,10)
 	end
+	love.graphics.rotate(rotate)
 
 end
 
 -- *********************VIEWPORT AND DRAW**************************
 
 function drawDisplay(alive, vp, leftX, topY)
+	if grid == 1 then
+		love.graphics.setColor({170,170,170,255})
+		drawGrid(leftX, topY, vp)
+	end
+	love.graphics.setColor({255,255,255,255})
 	for i=1, #alive do
 		if alive[i].x ~= nil and alive[i].y ~= nil then
 			if (alive[i].x * vp.tileSize) > (leftX.virtual + leftX.actual)
@@ -177,6 +228,15 @@ function drawDisplay(alive, vp, leftX, topY)
 				love.graphics.rectangle("fill",(alive[i].x * vp.tileSize) - leftX.virtual + leftX.actual,(alive[i].y * vp.tileSize) - topY.virtual + topY.actual,vp.tileSize,vp.tileSize)
 			end
 		end
+	end
+end
+
+function drawGrid(leftX, topY, vp)
+	for i = vp.tileSize + leftX.actual, vp.width, vp.tileSize do
+		love.graphics.line(i,0,i,vp.height) -- vert
+	end
+	for j = vp.tileSize + topY.actual, vp.height, vp.tileSize do
+			love.graphics.line(0,j,vp.width,j) -- horiz
 	end
 end
 
@@ -227,10 +287,12 @@ function initViewPort(tileSize)
 	--	topL, topR, botL, botR = {}
 	local vp = {}
 --	(math.floor(height/tileSize)/2)
-	vp.top = 0-math.floor(height/2)
-	vp.left = 0-math.floor(width/2)
-	vp.bot = height-1-math.floor(height/2)
-	vp.right = width-1-math.floor(width/2)
+	vp.width = width / 2
+	vp.height = height / 2
+	vp.top = 0-math.floor(vp.height/2)
+	vp.left = 0-math.floor(vp.width/2)
+	vp.bot = vp.height-1-math.floor(vp.height/2)
+	vp.right = vp.width-1-math.floor(vp.width/2)
 	vp.tileSize = tileSize
 	return vp
 end
@@ -264,29 +326,29 @@ function iterateGeneration(aliveList, generation)
 	--]=]
 	if generation == nil then generation = 0 end
 	local _generation = generation + 1
-	local newAliveList = fillNewAliveList(aliveList)
+	local newAliveList, stagnent = fillNewAliveList(aliveList)
 	local population = #newAliveList
-	return newAliveList, _generation, population
+	return newAliveList, _generation, population, stagnent
 end
 
-function checkIfAdded(list, x, y) 
+function checkIfIndexed(list, x, y) 
 	local _list = list
-	if _list.added[x] == nil then
+	if _list.index[x] == nil then
 		return false
-	elseif _list.added[x][y] == nil then
+	elseif _list.index[x][y] == nil then
 		return false
 	else
 		return true
 	end
 end
 
-function addToAdded(list, x, y) 
+function addToIndex(list, x, y) 
 	local _list = list
-	if _list.added[x] == nil then
-		_list.added[x] = {}
-		_list.added[x][y] = 1
-	elseif _list.added[x][y] == nil then
-		_list.added[x][y] = 1
+	if _list.index[x] == nil then
+		_list.index[x] = {}
+		_list.index[x][y] = 1
+	elseif _list.index[x][y] == nil then
+		_list.index[x][y] = 1
 	end
 	return _list
 end
@@ -301,34 +363,52 @@ end
 
 function addToNewAliveList(newAliveList, x, y)
 	if newAliveList == nil then newAliveList = {} end
-	if newAliveList.added == nil then newAliveList.added = {} end
-	if (checkIfAdded(newAliveList, x, y) == false) then
+	if newAliveList.index == nil then newAliveList.index = {} end
+	if (checkIfIndexed(newAliveList, x, y) == false) then
 		newAliveList[(#newAliveList)+1] = {}
 		newAliveList[(#newAliveList)].x = x
 		newAliveList[(#newAliveList)].y = y
-		newAliveList = addToAdded(newAliveList, x, y)
+		newAliveList = addToIndex(newAliveList, x, y)
 	end
+	return newAliveList
 end
 
 function createAliveIndex(aliveList) -- tested, works
-	local aliveIndex = {}
 	for entry,pntr in ipairs(aliveList) do
-		if aliveIndex[pntr.x] == nil then
-			aliveIndex[pntr.x] = {}
-			aliveIndex[pntr.x][pntr.y] = 1
-		elseif aliveIndex[pntr.x][pntr.y] == nil then
-			aliveIndex[pntr.x][pntr.y] = 1
+		if aliveList.index[pntr.x] == nil then
+			aliveList.index[pntr.x] = {}
+			aliveList.index[pntr.x][pntr.y] = 1
+		elseif aliveList.index[pntr.x][pntr.y] == nil then
+			aliveList.index[pntr.x][pntr.y] = 1
 		end
 	end
-	return aliveIndex
+	return aliveList
 end
 
-function checkAgainstIndex(aliveIndex, x, y, neighbors) -- tested, works
+function checkIfStagnent(aliveList, newAliveList) -- tested, works
+	for entry,pntr in ipairs(aliveList) do
+		if newAliveList.index[pntr.x] == nil then
+			return false
+		elseif newAliveList.index[pntr.x][pntr.y] == nil then
+			return false
+		end
+	end
+	for entry,pntr in ipairs(newAliveList) do
+		if aliveList.index[pntr.x] == nil then
+			return false
+		elseif aliveList.index[pntr.x][pntr.y] == nil then
+			return false
+		end
+	end
+	return true
+end
+
+function checkAgainstIndex(aliveList, x, y, neighbors) -- tested, works
 	local dead
-	if aliveIndex[x] == nil then
+	if aliveList.index[x] == nil then
 		dead = true
 		return neighbors, dead
-	elseif aliveIndex[x][y] == 1 then
+	elseif aliveList.index[x][y] == 1 then
 		neighbors = neighbors + 1
 		dead = false
 		return neighbors, dead
@@ -337,25 +417,26 @@ function checkAgainstIndex(aliveIndex, x, y, neighbors) -- tested, works
 	return neighbors, dead
 end
 
-function deadCellRules(index, newList, x, y) -- tested, works
+function deadCellRules(list, newList, x, y) -- tested, works
 	local neighbors = 0
 	local _x, _y
-	local _newList = newList
 	for _x = x-1, x+1 do
 		for _y = y-1, y+1 do
 			if _x ~= x or _y ~= y then
-				neighbors, dead = checkAgainstIndex(index, _x, _y, neighbors)
+				neighbors, dead = checkAgainstIndex(list, _x, _y, neighbors)
 			end
 		end
 	end
-	addToTable(_newList, x, y, neighbors, 2)
-	return _newList
+	addToTable(newList, x, y, neighbors, 2)
+	return newList
 end
 
 function fillNewAliveList(aliveList)
 	local newAliveList = {}
-	newAliveList.added = {}
-	local aliveIndex = createAliveIndex(aliveList)
+	newAliveList.index = {}
+	if aliveList.index == nil then 
+		aliveList = createAliveIndex(aliveList)
+	end
 	local entry, pntr
 	for entry, pntr in ipairs(aliveList) do
 		local neighbors = 0
@@ -363,15 +444,14 @@ function fillNewAliveList(aliveList)
 		for x = (pntr.x)-1, (pntr.x)+1 do
 			for y = (pntr.y)-1, (pntr.y)+1 do
 				if x ~= pntr.x or y ~= pntr.y then
-					neighbors, dead = checkAgainstIndex(aliveIndex, x, y, neighbors)
+					neighbors, dead = checkAgainstIndex(aliveList, x, y, neighbors)
 				end
 				if dead == true then --enters inner
-					newAliveList = deadCellRules(aliveIndex, newAliveList, x, y)
+					newAliveList = deadCellRules(aliveList, newAliveList, x, y)
 				end --exits inner
 			end
 		end
 		addToTable(newAliveList, pntr.x, pntr.y, neighbors, 1)
 	end
-	newAliveList.added = nil
-	return newAliveList
+	return newAliveList, checkIfStagnent(aliveList, newAliveList)
 end

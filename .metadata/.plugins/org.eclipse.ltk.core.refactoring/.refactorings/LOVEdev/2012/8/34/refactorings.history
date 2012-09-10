@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Rename source module &apos;libs/hump.camera.lua&apos; to &apos;camera-old.lua&apos;&#x0A;- Original element: &apos;libs/hump.camera.lua&apos;&#x0A;- Renamed element: &apos;libs/hump.camera-old.lua&apos;" description="Rename source module &apos;camera.lua&apos;" flags="589830" id="org.eclipse.dltk.ui.rename.sourcemodule" input="/src&lt;libs\/hump{camera.lua" name="camera-old.lua" stamp="1345416155964" version="1.0"/>
+</session>
